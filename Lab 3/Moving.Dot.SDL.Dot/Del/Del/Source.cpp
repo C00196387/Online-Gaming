@@ -6,6 +6,14 @@ and may not be redistributed without written permission.*/
 #include <SDL_image.h>
 #include <stdio.h>
 #include <string>
+#include <iostream>
+#include <string>
+#include <WS2tcpip.h>
+#include <sstream>
+
+#include <vector>
+
+#pragma comment(lib, "ws2_32.lib")
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
@@ -71,7 +79,7 @@ public:
 	Dot();
 
 	//Takes key presses and adjusts the dot's velocity
-	void handleEvent(SDL_Event& e);
+	std::string handleEvent(SDL_Event& e);
 
 	//Moves the dot
 	void move();
@@ -79,7 +87,6 @@ public:
 	//Shows the dot on the screen
 	void render();
 
-private:
 	//The X and Y offsets of the dot
 	int mPosX, mPosY;
 
@@ -265,32 +272,10 @@ Dot::Dot()
 	mVelY = 0;
 }
 
-void Dot::handleEvent(SDL_Event& e)
+std::string Dot::handleEvent(SDL_Event& e)
 {
-	//If a key was pressed
-	if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
-	{
-		//Adjust the velocity
-		switch (e.key.keysym.sym)
-		{
-		case SDLK_UP: mVelY -= DOT_VEL; break;
-		case SDLK_DOWN: mVelY += DOT_VEL; break;
-		case SDLK_LEFT: mVelX -= DOT_VEL; break;
-		case SDLK_RIGHT: mVelX += DOT_VEL; break;
-		}
-	}
-	//If a key was released
-	else if (e.type == SDL_KEYUP && e.key.repeat == 0)
-	{
-		//Adjust the velocity
-		switch (e.key.keysym.sym)
-		{
-		case SDLK_UP: mVelY += DOT_VEL; break;
-		case SDLK_DOWN: mVelY -= DOT_VEL; break;
-		case SDLK_LEFT: mVelX += DOT_VEL; break;
-		case SDLK_RIGHT: mVelX -= DOT_VEL; break;
-		}
-	}
+
+	return "NO";
 }
 
 void Dot::move()
@@ -409,6 +394,45 @@ void close()
 
 int main(int argc, char* args[])
 {
+	std::string ipAddress = "127.0.0.1";
+	int port = 5050;
+
+	WSAData data;
+	WORD ver = MAKEWORD(2, 2);
+	int wsResult = WSAStartup(ver, &data);
+	if (wsResult != 0)
+	{
+		std::cerr << "CAN'T START WINSOCK" << std::endl;
+		WSACleanup();
+		return 0;
+	}
+
+	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock == INVALID_SOCKET)
+	{
+		std::cerr << "Can't create socket" << std::endl;
+		WSACleanup();
+		return 0;
+	}
+
+	sockaddr_in hint;
+	hint.sin_family = AF_INET;
+	hint.sin_port = htons(port);
+	inet_pton(AF_INET, ipAddress.c_str(), &hint.sin_addr);
+
+	int connResult = connect(sock, (sockaddr*)&hint, sizeof(hint));
+
+	if (connResult == SOCKET_ERROR)
+	{
+		std::cerr << "Can't create socket" << std::endl;
+		closesocket(sock);
+		WSACleanup();
+		return 0;
+	}
+
+	char buf[4096];
+	std::string userInput;
+
 	//Start up SDL and create window
 	if (!init())
 	{
@@ -432,9 +456,15 @@ int main(int argc, char* args[])
 			//The dot that will be moving around on the screen
 			Dot dot;
 
+			int g = 0;
+
 			//While application is running
-			while (!quit)
+			while (1 != 0)
 			{
+				userInput = "(null)";
+
+				std::cout << g << std::endl;
+
 				//Handle events on queue
 				while (SDL_PollEvent(&e) != 0)
 				{
@@ -443,13 +473,35 @@ int main(int argc, char* args[])
 					{
 						quit = true;
 					}
-
-					//Handle input for the dot
-					dot.handleEvent(e);
+					if (e.type == SDL_KEYDOWN)
+					{
+						//Adjust the velocity
+						switch (e.key.keysym.sym)
+						{
+						case SDLK_UP: userInput += "(p1)(up)"; break;
+						case SDLK_DOWN: userInput += "(p1)(down)"; break;
+						case SDLK_LEFT: userInput += "(p1)(left)"; break;
+						case SDLK_RIGHT: userInput += "(p1)(right)"; break;
+						default: break;
+						}
+					}
 				}
 
-				//Move the dot
-				dot.move();
+				int sendResult = send(sock, userInput.c_str(), userInput.size(), 0);
+				if (sendResult != SOCKET_ERROR)
+				{
+					ZeroMemory(buf, 4096);
+					g++;
+					int bytesReceived = recv(sock, buf, 4096, 0);
+					if (bytesReceived > 0)
+					{
+						int p1x, p1y;
+
+						std::stringstream ss(std::string(buf, 0, bytesReceived));
+
+						ss >> dot.mPosX >> dot.mPosY;
+					}
+				}
 
 				//Clear screen
 				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -464,6 +516,7 @@ int main(int argc, char* args[])
 		}
 	}
 
+	closesocket(sock);
 	//Free resources and close SDL
 	close();
 
