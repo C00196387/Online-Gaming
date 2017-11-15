@@ -394,7 +394,7 @@ void close()
 
 int main(int argc, char* args[])
 {
-	std::string ipAddress = "127.0.0.1";
+	std::string ipAddress = "149.153.106.162";
 	int port = 5050;
 
 	WSAData data;
@@ -455,15 +455,30 @@ int main(int argc, char* args[])
 
 			//The dot that will be moving around on the screen
 			Dot dot;
+			Dot dot2;
 
-			int g = 0;
+			std::string id = "";
+
+			userInput = "(GIVEID)";
+
+			int sendResult = send(sock, userInput.c_str(), userInput.size(), 0);
+			if (sendResult != SOCKET_ERROR)
+			{
+				ZeroMemory(buf, 4096);
+				int bytesReceived = recv(sock, buf, 4096, 0);
+				if (bytesReceived > 0)
+				{
+					std::stringstream ss(std::string(buf, 0, bytesReceived));
+
+					ss >> dot.mPosX >> dot.mPosY >> dot2.mPosX >> dot2.mPosY;
+				}
+			}
 
 			//While application is running
 			while (1 != 0)
 			{
-				userInput = "(null)";
 
-				std::cout << g << std::endl;
+				userInput = "(NULL)";
 
 				//Handle events on queue
 				while (SDL_PollEvent(&e) != 0)
@@ -478,10 +493,12 @@ int main(int argc, char* args[])
 						//Adjust the velocity
 						switch (e.key.keysym.sym)
 						{
-						case SDLK_UP: userInput += "(p1)(up)"; break;
-						case SDLK_DOWN: userInput += "(p1)(down)"; break;
-						case SDLK_LEFT: userInput += "(p1)(left)"; break;
-						case SDLK_RIGHT: userInput += "(p1)(right)"; break;
+						case SDLK_UP: 
+							userInput += "(up)"; 
+							break;
+						case SDLK_DOWN: userInput += "(down)"; break;
+						case SDLK_LEFT: userInput += "(left)"; break;
+						case SDLK_RIGHT: userInput += "(right)"; break;
 						default: break;
 						}
 					}
@@ -491,15 +508,11 @@ int main(int argc, char* args[])
 				if (sendResult != SOCKET_ERROR)
 				{
 					ZeroMemory(buf, 4096);
-					g++;
 					int bytesReceived = recv(sock, buf, 4096, 0);
 					if (bytesReceived > 0)
 					{
-						int p1x, p1y;
-
 						std::stringstream ss(std::string(buf, 0, bytesReceived));
-
-						ss >> dot.mPosX >> dot.mPosY;
+						ss >> dot.mPosX >> dot.mPosY >> dot2.mPosX >> dot2.mPosY;
 					}
 				}
 
@@ -509,6 +522,7 @@ int main(int argc, char* args[])
 
 				//Render objects
 				dot.render();
+				dot2.render();
 
 				//Update screen
 				SDL_RenderPresent(gRenderer);

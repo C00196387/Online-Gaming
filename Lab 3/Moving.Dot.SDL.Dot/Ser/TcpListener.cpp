@@ -109,7 +109,7 @@ void CTcpListener::Run()
 				FD_SET(client, &m_master);
 
 				// Send a welcome message to the connected client
-				std::string welcomeMsg = "0 0";
+				std::string welcomeMsg = "0 0 0 0";
 				send(client, welcomeMsg.c_str(), welcomeMsg.size() + 1, 0);
 			}
 			else // It's an inbound message
