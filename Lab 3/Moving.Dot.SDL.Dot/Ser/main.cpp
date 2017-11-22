@@ -15,18 +15,20 @@ CQotd quotes("wisdom.txt");
 int p1x = 0;
 int p1y = 0;
 
-int p2x = 100;
-int p2y = 100;
+int p2x = 400;
+int p2y = 400;
 
 int systemID = 0;
 int p1 = 0;
 int p2 = 0;
 
+bool win = false;
+
 int timeUpdated = 0;
 
 void main()
 {
-	CTcpListener server("149.153.106.162", 5050, Listener_MessageReceived);
+	CTcpListener server("127.0.0.1", 5050, Listener_MessageReceived);
 	
 	if (server.Init())
 	{
@@ -54,43 +56,47 @@ void Listener_MessageReceived(CTcpListener* listener, int client, string msg, st
 	}
 	else
 	{
-		if (client == p1)
+		if (client == p1 && !win)
 		{
 			if (msg.find("(right)") != std::string::npos)
 			{
-				p1x += 1;
+				p1x += 10;
 			}
 			if (msg.find("(left)") != std::string::npos)
 			{
-				p1x -= 1;
+				p1x -= 10;
 			}
 			if (msg.find("(up)") != std::string::npos)
 			{
-				p1y -= 1;
+				p1y -= 10;
 			}
 			if (msg.find("(down)") != std::string::npos)
 			{
-				p1y += 1;
+				p1y += 10;
 			}
 		}
-		if (client == p2)
+		if (client == p2 && !win)
 		{
 			if (msg.find("(right)") != std::string::npos)
 			{
-				p2x += 1;
+				p2x += 10;
 			}
 			if (msg.find("(left)") != std::string::npos)
 			{
-				p2x -= 1;
+				p2x -= 10;
 			}
 			if (msg.find("(up)") != std::string::npos)
 			{
-				p2y -= 1;
+				p2y -= 10;
 			}
 			if (msg.find("(down)") != std::string::npos)
 			{
-				p2y += 1;
+				p2y += 10;
 			}
+		}
+		if (msg.find("(WIN)") != std::string::npos)
+		{
+			win = true;
 		}
 		listener->Send(client, PacketMaker());
 	}

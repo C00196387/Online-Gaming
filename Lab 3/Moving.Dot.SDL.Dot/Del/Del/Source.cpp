@@ -394,7 +394,7 @@ void close()
 
 int main(int argc, char* args[])
 {
-	std::string ipAddress = "149.153.106.162";
+	std::string ipAddress = "127.0.0.1";
 	int port = 5050;
 
 	WSAData data;
@@ -450,12 +450,19 @@ int main(int argc, char* args[])
 			//Main loop flag
 			bool quit = false;
 
+			bool up = false;
+			bool down = false;
+			bool left = false;
+			bool right = false;
+
 			//Event handler
 			SDL_Event e;
 
 			//The dot that will be moving around on the screen
 			Dot dot;
 			Dot dot2;
+
+			bool win = false;
 
 			std::string id = "";
 
@@ -479,6 +486,10 @@ int main(int argc, char* args[])
 			{
 
 				userInput = "(NULL)";
+				if (win)
+				{
+					userInput += "(WIN)";
+				}
 
 				//Handle events on queue
 				while (SDL_PollEvent(&e) != 0)
@@ -493,15 +504,42 @@ int main(int argc, char* args[])
 						//Adjust the velocity
 						switch (e.key.keysym.sym)
 						{
-						case SDLK_UP: 
-							userInput += "(up)"; 
-							break;
-						case SDLK_DOWN: userInput += "(down)"; break;
-						case SDLK_LEFT: userInput += "(left)"; break;
-						case SDLK_RIGHT: userInput += "(right)"; break;
+						case SDLK_UP: up = true; break;
+						case SDLK_DOWN: down = true; break;
+						case SDLK_LEFT: left = true; break;
+						case SDLK_RIGHT: right = true; break;
 						default: break;
 						}
 					}
+					if (e.type == SDL_KEYUP)
+					{
+						//Adjust the velocity
+						switch (e.key.keysym.sym)
+						{
+						case SDLK_UP: up = false; break;
+						case SDLK_DOWN: down = false; break;
+						case SDLK_LEFT: left = false; break;
+						case SDLK_RIGHT: right = false; break;
+						default: break;
+						}
+					}
+				}
+
+				if (up)
+				{
+					userInput += "(up)";
+				}
+				if (down)
+				{
+					userInput += "(down)";
+				}
+				if (left)
+				{
+					userInput += "(left)";
+				}
+				if (right)
+				{
+					userInput += "(right)";
 				}
 
 				int sendResult = send(sock, userInput.c_str(), userInput.size(), 0);
@@ -516,13 +554,31 @@ int main(int argc, char* args[])
 					}
 				}
 
+				if (SDL_IntersectRect(new SDL_Rect{ dot.mPosX, dot.mPosY, 20, 20 }, new SDL_Rect{ dot2.mPosX, dot2.mPosY, 20, 20 }, new SDL_Rect{ 0,0,0,0 }))
+				{
+					win = true;
+				}
+
+
 				//Clear screen
 				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 				SDL_RenderClear(gRenderer);
 
 				//Render objects
-				dot.render();
-				dot2.render();
+				if (!win)
+				{
+					gDotTexture.setColor(255, 0, 0);
+					dot.render();
+					gDotTexture.setColor(0, 0, 255);
+					dot2.render();
+				}
+				else
+				{
+					gDotTexture.setColor(0, 255, 0);
+					dot.render();
+					gDotTexture.setColor(0, 255, 0);
+					dot2.render();
+				}
 
 				//Update screen
 				SDL_RenderPresent(gRenderer);
