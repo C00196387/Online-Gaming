@@ -1,5 +1,0 @@
-﻿  Source.cpp
-c:\users\pixir\desktop\college stuff\online-gaming\lab 3\moving.dot.sdl.dot\del\del\source.cpp(471): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-c:\users\pixir\desktop\college stuff\online-gaming\lab 3\moving.dot.sdl.dot\del\del\source.cpp(545): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  Del.vcxproj -> C:\Users\pixir\Desktop\College Stuff\Online-Gaming\Lab 3\Moving.Dot.SDL.Dot\Del\x64\Debug\Del.exe
-  Del.vcxproj -> C:\Users\pixir\Desktop\College Stuff\Online-Gaming\Lab 3\Moving.Dot.SDL.Dot\Del\x64\Debug\Del.pdb (Partial PDB)
