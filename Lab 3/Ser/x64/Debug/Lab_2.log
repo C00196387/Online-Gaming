@@ -1,3 +1,8 @@
 ﻿  main.cpp
-  Lab_2.vcxproj -> C:\Users\nover\Desktop\Online-Gaming-master\Lab 3\Moving.Dot.SDL.Dot\Ser\x64\Debug\Lab_2.exe
-  Lab_2.vcxproj -> C:\Users\nover\Desktop\Online-Gaming-master\Lab 3\Moving.Dot.SDL.Dot\Ser\x64\Debug\Lab_2.pdb (Partial PDB)
+  TcpListener.cpp
+c:\users\pixir\desktop\college stuff\online-gaming\lab 3\ser\tcplistener.cpp(58): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+c:\users\pixir\desktop\college stuff\online-gaming\lab 3\ser\tcplistener.cpp(142): warning C4018: '<': signed/unsigned mismatch
+c:\users\pixir\desktop\college stuff\online-gaming\lab 3\ser\tcplistener.cpp(145): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
+  Generating Code...
+  Lab_2.vcxproj -> C:\Users\pixir\Desktop\College Stuff\Online-Gaming\Lab 3\Ser\x64\Debug\Lab_2.exe
+  Lab_2.vcxproj -> C:\Users\pixir\Desktop\College Stuff\Online-Gaming\Lab 3\Ser\x64\Debug\Lab_2.pdb (Partial PDB)

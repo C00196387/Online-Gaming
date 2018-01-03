@@ -13,6 +13,8 @@ and may not be redistributed without written permission.*/
 
 #include <vector>
 
+#include "TcpListener.h"
+
 #pragma comment(lib, "ws2_32.lib")
 
 //Screen dimension constants
@@ -392,11 +394,187 @@ void close()
 	SDL_Quit();
 }
 
+
+void Listener_MessageReceived(CTcpListener* listener, int client, std::string msg, std::string sock);
+std::string PacketMaker(std::string id);
+int player(std::string ipAddress, int port);
+int host(std::string ipAddress, int port);
+
+// This is kinda bad because it's global.
+
+int p1x = 0;
+int p1y = 0;
+
+int p2x = 400;
+int p2y = 400;
+
+int systemID = 0;
+int p1 = 0;
+int p2 = 0;
+
+bool p1Arrived = false;
+bool p2Arrived = false;
+
+bool win = false;
+
+int timeUpdated = 0;
+
+std::vector<int> smolder;
+
 int main(int argc, char* args[])
 {
-	std::string ipAddress = "149.153.106.156";
+	std::string ipAddress = "127.0.0.1";
 	int port = 1234;
 
+	std::cout << "Host? Y/N" << std::endl;
+	std::string result;
+	std::cin >> result;
+	std::cout << std::endl;
+
+	if (result == "Y" || result == "y")
+	{
+		int x = host(ipAddress, port);
+	}
+	else
+	{
+		int x = player(ipAddress, port);
+	}
+	close();
+
+	return 0;
+}
+
+
+int host(std::string ipAddress, int port)
+{
+
+	CTcpListener server(ipAddress, port, Listener_MessageReceived);
+	//Start up SDL and create window
+	if (!init())
+	{
+		printf("Failed to initialize!\n");
+	}
+	else
+	{
+		//Load media
+		if (!loadMedia())
+		{
+			printf("Failed to load media!\n");
+		}
+		else
+		{
+			//Main loop flag
+			bool quit = false;
+
+			bool up = false;
+			bool down = false;
+			bool left = false;
+			bool right = false;
+
+			//Event handler
+			SDL_Event e;
+
+			//The dot that will be moving around on the screen
+			Dot dot;
+			Dot dot2;
+
+			bool win = false;
+
+			//While application is running
+			while (1 != 0)
+			{
+				server.Run();
+				//Handle events on queue
+				while (SDL_PollEvent(&e) != 0)
+				{
+					//User requests quit
+					if (e.type == SDL_QUIT)
+					{
+						quit = true;
+					}
+					if (e.type == SDL_KEYDOWN)
+					{
+						//Adjust the velocity
+						switch (e.key.keysym.sym)
+						{
+						case SDLK_UP: up = true; break;
+						case SDLK_DOWN: down = true; break;
+						case SDLK_LEFT: left = true; break;
+						case SDLK_RIGHT: right = true; break;
+						default: break;
+						}
+					}
+					if (e.type == SDL_KEYUP)
+					{
+						//Adjust the velocity
+						switch (e.key.keysym.sym)
+						{
+						case SDLK_UP: up = false; break;
+						case SDLK_DOWN: down = false; break;
+						case SDLK_LEFT: left = false; break;
+						case SDLK_RIGHT: right = false; break;
+						default: break;
+						}
+					}
+				}
+
+				if (up)
+				{
+					p1y -= 10;
+				}
+				if (down)
+				{
+					p1y += 10;
+				}
+				if (left)
+				{
+					p1x -= 10;
+				}
+				if (right)
+				{
+					p1x += 10;
+				}
+				dot.mPosX = p1x;
+				dot.mPosY = p1y;
+				dot2.mPosX = p2x;
+				dot2.mPosY = p2y;
+
+				if (SDL_IntersectRect(new SDL_Rect{ dot.mPosX, dot.mPosY, 20, 20 }, new SDL_Rect{ dot2.mPosX, dot2.mPosY, 20, 20 }, new SDL_Rect{ 0,0,0,0 }))
+				{
+					win = true;
+				}
+
+				//Clear screen
+				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+				SDL_RenderClear(gRenderer);
+
+				//Render objects
+				if (!win)
+				{
+					gDotTexture.setColor(255, 0, 0);
+					dot.render();
+					gDotTexture.setColor(0, 0, 255);
+					dot2.render();
+				}
+				else
+				{
+					gDotTexture.setColor(0, 255, 0);
+					dot.render();
+					gDotTexture.setColor(0, 255, 0);
+					dot2.render();
+				}
+
+				//Update screen
+				SDL_RenderPresent(gRenderer);
+			}
+		}
+	}
+
+	return 0;
+}
+
+int player(std::string ipAddress, int port)
+{
 	WSAData data;
 	WORD ver = MAKEWORD(2, 2);
 	int wsResult = WSAStartup(ver, &data);
@@ -482,7 +660,6 @@ int main(int argc, char* args[])
 			//While application is running
 			while (1 != 0)
 			{
-
 				userInput = id;
 				if (win)
 				{
@@ -585,8 +762,96 @@ int main(int argc, char* args[])
 	}
 
 	closesocket(sock);
-	//Free resources and close SDL
-	close();
 
 	return 0;
+}
+
+void Listener_MessageReceived(CTcpListener* listener, int client, std::string msg, std::string sock)
+{
+	std::string holder = "(NULL)";
+	if (msg.find("(GIVEID)") != std::string::npos)
+	{
+		if (systemID == 0)
+		{
+			systemID = client;
+		}
+		else if (p1 == 0 && client != systemID)
+		{
+			p1 = client;
+		}
+		else if (p2 == 0 && client != systemID && client != p1)
+		{
+			p2 = client;
+		}
+		smolder.push_back(client);
+	}
+	else
+	{
+
+		if (client != systemID)
+		{
+			holder = std::to_string(client);
+		}
+
+		if (msg.find(std::to_string(p1)) != std::string::npos && !win)
+		{
+			if (msg.find("(right)") != std::string::npos)
+			{
+				p2x += 10;
+			}
+			if (msg.find("(left)") != std::string::npos)
+			{
+				p2x -= 10;
+			}
+			if (msg.find("(up)") != std::string::npos)
+			{
+				p2y -= 10;
+			}
+			if (msg.find("(down)") != std::string::npos)
+			{
+				p2y += 10;
+			}
+		}
+		else if (msg.find(std::to_string(p2)) != std::string::npos && !win)
+		{
+			if (msg.find("(right)") != std::string::npos)
+			{
+				p2x += 10;
+			}
+			if (msg.find("(left)") != std::string::npos)
+			{
+				p2x -= 10;
+			}
+			if (msg.find("(up)") != std::string::npos)
+			{
+				p2y -= 10;
+			}
+			if (msg.find("(down)") != std::string::npos)
+			{
+				p2y += 10;
+			}
+		}
+		if (msg.find("(WIN)") != std::string::npos)
+		{
+			win = true;
+		}
+	}
+	listener->Send(client, PacketMaker(holder));
+}
+
+
+std::string PacketMaker(std::string id)
+{
+	std::string holder;
+	holder = id;
+	holder += " ";
+	holder += std::to_string(p1x);
+	holder += " ";
+	holder += std::to_string(p1y);
+	holder += " ";
+	holder += std::to_string(p2x);
+	holder += " ";
+	holder += std::to_string(p2y);
+
+	return holder;
 }

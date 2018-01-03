@@ -73,9 +73,6 @@ bool CTcpListener::Init()
 // The main processing loop
 void CTcpListener::Run()
 {
-	
-	while (m_running)
-	{
 		// Make a copy of them_master file descriptor set, this is SUPER important because
 		// the call to select() is _DESTRUCTIVE_. The copy only contains the sockets that
 		// are accepting inbound connection requests OR messages. 
@@ -151,28 +148,6 @@ void CTcpListener::Run()
 				}
 			}
 		}
-	}
-
-	// Remove the listening socket from them_master file descriptor set and close it
-	// to prevent anyone else trying to connect.
-	FD_CLR(m_listening, &m_master);
-	closesocket(m_listening);
-
-	// Message to let users know what's happening.
-	std::string msg = "Server is shutting down. Goodbye\r\n";
-
-	while (m_master.fd_count > 0)
-	{
-		// Get the socket number
-		SOCKET sock =m_master.fd_array[0];
-
-		// Send the goodbye message
-		send(sock, msg.c_str(), msg.size() + 1, 0);
-
-		// Remove it from them_master file list and close the socket
-		FD_CLR(sock, &m_master);
-		closesocket(sock);
-	}
 }
 
 void CTcpListener::Cleanup()

@@ -34,11 +34,15 @@ std::vector<int> smolder;
 
 void main()
 {
-	CTcpListener server("149.153.106.156", 1234, Listener_MessageReceived);
+	CTcpListener server("127.0.0.1", 1234, Listener_MessageReceived);
 	
 	if (server.Init())
 	{
-		server.Run();
+		while (1 != 0)
+		{
+			server.Run();
+		}
+
 	}
 }
 
