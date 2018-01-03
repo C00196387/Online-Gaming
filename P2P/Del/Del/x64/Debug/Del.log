@@ -1,5 +1,3 @@
-﻿  Source.cpp
-c:\users\new user\desktop\online-gaming\p2p\del\del\source.cpp(192): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-c:\users\new user\desktop\online-gaming\p2p\del\del\source.cpp(264): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+﻿  Player.cpp
   Del.vcxproj -> C:\Users\New User\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.exe
   Del.vcxproj -> C:\Users\New User\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.pdb (Partial PDB)

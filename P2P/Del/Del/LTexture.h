@@ -36,6 +36,8 @@ public:
 	//Set color modulation
 	void setColor(Uint8 red, Uint8 green, Uint8 blue);
 
+	void setColor(SDL_Color colour);
+
 	//Set blending
 	void setBlendMode(SDL_BlendMode blending);
 

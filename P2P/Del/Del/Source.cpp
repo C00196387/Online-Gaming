@@ -2,6 +2,7 @@
 and may not be redistributed without written permission.*/
 
 #include "Player.h"
+#include "UserInput.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -171,17 +172,20 @@ int main(int argc, char* args[])
 			//Main loop flag
 			bool quit = false;
 
-			bool up = false;
-			bool down = false;
-			bool left = false;
-			bool right = false;
-
 			//Event handler
 			SDL_Event e;
 
 			//The dot that will be moving around on the screen
-			Player dot;
-			Player dot2;
+			//Player player1(SCREEN_WIDTH, SCREEN_HEIGHT, "red");
+			//Player player2(SCREEN_WIDTH, SCREEN_HEIGHT, "blue");
+
+			std::vector<Player> redTeam;
+			redTeam.push_back(Player{ SCREEN_WIDTH, SCREEN_HEIGHT, "red" });
+
+			std::vector<Player> blueTeam;
+			blueTeam.push_back(Player{ SCREEN_WIDTH, SCREEN_HEIGHT, "blue" });
+
+			UserInput input;
 
 			bool win = false;
 
@@ -218,45 +222,23 @@ int main(int argc, char* args[])
 					{
 						quit = true;
 					}
-					if (e.type == SDL_KEYDOWN)
-					{
-						//Adjust the velocity
-						switch (e.key.keysym.sym)
-						{
-						case SDLK_UP: up = true; break;
-						case SDLK_DOWN: down = true; break;
-						case SDLK_LEFT: left = true; break;
-						case SDLK_RIGHT: right = true; break;
-						default: break;
-						}
-					}
-					if (e.type == SDL_KEYUP)
-					{
-						//Adjust the velocity
-						switch (e.key.keysym.sym)
-						{
-						case SDLK_UP: up = false; break;
-						case SDLK_DOWN: down = false; break;
-						case SDLK_LEFT: left = false; break;
-						case SDLK_RIGHT: right = false; break;
-						default: break;
-						}
-					}
+
+					input.handleInput(e);
 				}
 
-				if (up)
+				if (input.up)
 				{
 					userInput += "(up)";
 				}
-				if (down)
+				if (input.down)
 				{
 					userInput += "(down)";
 				}
-				if (left)
+				if (input.left)
 				{
 					userInput += "(left)";
 				}
-				if (right)
+				if (input.right)
 				{
 					userInput += "(right)";
 				}
@@ -269,35 +251,45 @@ int main(int argc, char* args[])
 					if (bytesReceived > 0)
 					{
 						std::stringstream ss(std::string(buf, 0, bytesReceived));
-						ss >> id >> dot.mPosX >> dot.mPosY >> dot2.mPosX >> dot2.mPosY;
+						//ss >> id >> player1.mRect.x >> player1.mRect.y >> player2.mRect.x >> player2.mRect.y;
+						ss >> id >> redTeam.at(0).mRect.x >> redTeam.at(0).mRect.y >> blueTeam.at(0).mRect.x >> blueTeam.at(0).mRect.y;
 					}
 				}
 
-				if (SDL_IntersectRect(new SDL_Rect{ dot.mPosX, dot.mPosY, 20, 20 }, new SDL_Rect{ dot2.mPosX, dot2.mPosY, 20, 20 }, new SDL_Rect{ 0,0,0,0 }))
-				{
-					win = true;
-				}
+				//if (SDL_IntersectRect(new SDL_Rect{ player1.mPosX, player1.mPosY, player1.mWidth, player1.mHeight }, new SDL_Rect{ player2.mPosX, player2.mPosY, player2.mWidth, player2.mHeight}, new SDL_Rect{ 0,0,0,0 }))
+				//{
+				//	//win = true;
+				//}
 
+				for (int i = 0; i < redTeam.size(); i++)
+				{
+					for (int j = 0; j < blueTeam.size(); j++) 
+					{
+						blueTeam.at(j).checkIntersection(redTeam.at(i).mRect);
+					}
+				}
 
 				//Clear screen
 				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 				SDL_RenderClear(gRenderer);
 
 				//Render objects
-				if (!win)
+				//if (!win)
+				//{
+				for (int i = 0; i < redTeam.size(); i++)
 				{
-					gDotTexture.setColor(255, 0, 0);
-					dot.render(gDotTexture, gRenderer);
-					gDotTexture.setColor(0, 0, 255);
-					dot2.render(gDotTexture, gRenderer);
+					redTeam.at(i).render(gDotTexture, gRenderer);
 				}
-				else
+				for (int i = 0; i < blueTeam.size(); i++)
 				{
-					gDotTexture.setColor(0, 255, 0);
-					dot.render(gDotTexture, gRenderer);
-					gDotTexture.setColor(0, 255, 0);
-					dot2.render(gDotTexture, gRenderer);
+					blueTeam.at(i).render(gDotTexture, gRenderer);
 				}
+				//}
+				//else
+				//{
+				//	player1.render(gDotTexture, gRenderer);
+				//	player2.render(gDotTexture, gRenderer);
+				//}
 
 				//Update screen
 				SDL_RenderPresent(gRenderer);

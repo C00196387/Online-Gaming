@@ -109,6 +109,11 @@ void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
 	//Modulate texture rgb
 	SDL_SetTextureColorMod(mTexture, red, green, blue);
 }
+void LTexture::setColor(SDL_Color colour)
+{
+	//Modulate texture rgb
+	SDL_SetTextureColorMod(mTexture, colour.r, colour.g, colour.b);
+}
 
 void LTexture::setBlendMode(SDL_BlendMode blending)
 {
