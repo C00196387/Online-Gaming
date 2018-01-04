@@ -40,6 +40,8 @@ public:
 
 	SDL_Rect mRect;
 
+	std::string mTag;
+
 	std::string mTeam;
 	SDL_Color mColour;
 	SDL_Color mDeadColour;
