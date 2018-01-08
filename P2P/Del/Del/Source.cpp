@@ -10,6 +10,7 @@ and may not be redistributed without written permission.*/
 #include <string>
 #include <WS2tcpip.h>
 #include <sstream>
+#include <time.h>
 
 #include <vector>
 
@@ -422,7 +423,7 @@ int timeUpdated = 0;
 
 int main(int argc, char* args[])
 {
-	std::string ipAddress = "127.0.0.1";
+	std::string ipAddress = "149.153.106.155";
 	int port = 1234;
 
 	std::cout << "Host? Y/N" << std::endl;
@@ -446,7 +447,8 @@ int main(int argc, char* args[])
 
 int host(std::string ipAddress, int port)
 {
-	player.push_back(new PlayerObject(250, 250, "0"));
+	srand(time(NULL));
+	player.push_back(new PlayerObject(250, 250, "0", rand() % 255, rand() % 255, rand() % 255));
 	CTcpListener server(ipAddress, port, Listener_MessageReceived);
 	//Start up SDL and create window
 	if (!init())
@@ -539,6 +541,55 @@ int host(std::string ipAddress, int port)
 				//	win = true;
 				//}
 
+				for (int i = 0; i < player.size(); i++)
+				{
+					if (player.at(i)->x < 0)
+					{
+						player.at(i)->x = 640;
+					}
+					if (player.at(i)->x > 640)
+					{
+						player.at(i)->x = 0;
+					}
+					if (player.at(i)->y < 0)
+					{
+						player.at(i)->y = 480;
+					}
+					if (player.at(i)->y > 480)
+					{
+						player.at(i)->y = 0;
+					}
+
+					for (int j = 0; j < player.size(); j++)
+					{
+						if (i != j)
+						{
+							SDL_Rect tempUs = SDL_Rect{ player.at(i)->x, player.at(i)->y, 20, 20 };
+							SDL_Rect tempThem = SDL_Rect{ player.at(j)->x, player.at(j)->y, 20, 20 };
+							SDL_Rect temp = SDL_Rect{0,0,0,0};
+							if (SDL_IntersectRect(&tempUs, &tempThem, &temp))
+							{
+								if (player.at(i)->chaser)
+								{
+									if (player.at(j)->alive)
+									{
+										player.at(j)->alive = false;
+									}
+								}
+								else if (player.at(j)->chaser)
+								{
+									if (player.at(i)->alive)
+									{
+										player.at(i)->alive = false;
+									}
+								}
+							}
+
+						}
+					}
+
+				}
+
 				//Clear screen
 				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 				SDL_RenderClear(gRenderer);
@@ -546,21 +597,15 @@ int host(std::string ipAddress, int port)
 				//Render objects
 				for (int i = 0; i < player.size(); i++)
 				{
+
 					dot.mPosX = player.at(i)->x;
 					dot.mPosY = player.at(i)->y;
-					if (player.at(i)->color == "RED")
+
+					gDotTexture.setColor(player.at(i)->r, player.at(i)->g, player.at(i)->b);
+					if (player.at(i)->alive)
 					{
-						gDotTexture.setColor(255, 0, 0);
+						dot.render();
 					}
-					else if (player.at(i)->color == "BLUE")
-					{
-						gDotTexture.setColor(0, 0, 255);
-					}
-					else
-					{
-						gDotTexture.setColor(0, 255, 0);
-					}
-					dot.render();
 				}
 
 				//Update screen
@@ -727,27 +772,16 @@ int client(std::string ipAddress, int port)
 					if (bytesReceived > 0)
 					{
 						int size, x, y;
-						std::string color;
+						int r, g, b;
 
 						std::stringstream ss(std::string(buf, 0, bytesReceived));
 						ss >> size;
 						for (int i = 0; i < size; i++)
 						{
-							ss >> x >> y >> color;
+							ss >> x >> y >> r >> g >> b;
 							dot.mPosX = x;
 							dot.mPosY = y;
-							if (color == "RED")
-							{
-								gDotTexture.setColor(255, 0, 0);
-							}
-							else if (color == "BLUE")
-							{
-								gDotTexture.setColor(0, 0, 255);
-							}
-							else
-							{
-								gDotTexture.setColor(0, 255, 0);
-							}
+							gDotTexture.setColor(r, g, b);
 							dot.render();
 						}
 					}
@@ -767,46 +801,57 @@ int client(std::string ipAddress, int port)
 void Listener_MessageReceived(CTcpListener* listener, int client, std::string msg, std::string sock)
 {
 	std::string holder = "(NULL)";
-	if (msg.find("(GIVEID)") != std::string::npos)
+
+
+	bool proceed = false;
+	for (int i = 0; i < player.size(); i++)
 	{
-		if (systemID == 0)
+		proceed = true;
+		if (player.at(i)->id == sock)
 		{
-			systemID = client;
-		}
-		else
-		{
-			player.push_back(new PlayerObject(0, 0, std::to_string(client)));
+			proceed = false;
+			break;
 		}
 	}
-	else
+
+	//COLORREF myColorRef = RGB(
+	//	(BYTE)(rand() % 255), // red component of color
+	//	(BYTE)(rand() % 255), // green component of color
+	//	(BYTE)(rand() % 255) // blue component of color
+	//);
+
+	if (proceed)
 	{
-		if (client != systemID)
+		player.push_back(new PlayerObject(0, 0, sock, rand() % 255, rand() % 255, rand() % 255));
+	}
+
+	if (client != systemID)
+	{
+		holder = sock;
+	}
+	for (int i = 0; i < player.size(); i++)
+	{
+		if (player.at(i)->id == sock && sock == std::to_string(client))
 		{
-			holder = std::to_string(client);
-		}
-		for (int i = 0; i < player.size(); i++)
-		{
-			if (player.at(i)->id == std::to_string(client))
+			if (msg.find("(right)") != std::string::npos)
 			{
-				if (msg.find("(right)") != std::string::npos)
-				{
-					player.at(i)->x += 10;
-				}
-				if (msg.find("(left)") != std::string::npos)
-				{
-					player.at(i)->x -= 10;
-				}
-				if (msg.find("(up)") != std::string::npos)
-				{
-					player.at(i)->y -= 10;
-				}
-				if (msg.find("(down)") != std::string::npos)
-				{
-					player.at(i)->y += 10;
-				}
+				player.at(i)->x += 10;
+			}
+			if (msg.find("(left)") != std::string::npos)
+			{
+				player.at(i)->x -= 10;
+			}
+			if (msg.find("(up)") != std::string::npos)
+			{
+				player.at(i)->y -= 10;
+			}
+			if (msg.find("(down)") != std::string::npos)
+			{
+				player.at(i)->y += 10;
 			}
 		}
 	}
+
 	listener->Send(client, PacketMaker(holder));
 }
 
@@ -821,7 +866,9 @@ std::string PacketMaker(std::string id)
 	{
 		holder += std::to_string(player.at(i)->x) + " ";
 		holder += std::to_string(player.at(i)->y) + " ";
-		holder += player.at(i)->color + " ";
+		holder += std::to_string(player.at(i)->r) + " ";
+		holder += std::to_string(player.at(i)->g) + " ";
+		holder += std::to_string(player.at(i)->b) + " ";
 	}
 
 	return holder;

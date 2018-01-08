@@ -1,5 +1,6 @@
 ﻿  Source.cpp
-c:\users\pixir\desktop\college stuff\online-gaming\p2p\del\del\source.cpp(648): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-c:\users\pixir\desktop\college stuff\online-gaming\p2p\del\del\source.cpp(722): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  Del.vcxproj -> C:\Users\pixir\Desktop\College Stuff\Online-Gaming\P2P\Del\x64\Debug\Del.exe
-  Del.vcxproj -> C:\Users\pixir\Desktop\College Stuff\Online-Gaming\P2P\Del\x64\Debug\Del.pdb (Partial PDB)
+c:\users\gameuser\desktop\onlinedev\project i\online-gaming\p2p\del\del\source.cpp(450): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\gameuser\desktop\onlinedev\project i\online-gaming\p2p\del\del\source.cpp(693): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+c:\users\gameuser\desktop\onlinedev\project i\online-gaming\p2p\del\del\source.cpp(767): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  Del.vcxproj -> C:\Users\gameuser\Desktop\OnlineDev\Project I\Online-Gaming\P2P\Del\x64\Debug\Del.exe
+  Del.vcxproj -> C:\Users\gameuser\Desktop\OnlineDev\Project I\Online-Gaming\P2P\Del\x64\Debug\Del.pdb (Partial PDB)

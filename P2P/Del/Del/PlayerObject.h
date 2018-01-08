@@ -8,6 +8,8 @@ class PlayerObject
 public:
 	int x, y;
 	std::string id;
-	std::string color;
-	PlayerObject(int x, int y, std::string id) { this->x = x; this->y = y; this->id = id;  color = "BLUE"; };
+	int r, g, b;
+	bool alive;
+	bool chaser;
+	PlayerObject(int x, int y, std::string id, int r, int g, int b) { this->x = x; this->y = y; this->id = id; this->r = r; this->g = g; this->b = b; alive = true; };
 };
