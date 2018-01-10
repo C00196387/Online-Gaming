@@ -1,2 +1,6 @@
-﻿  Del.vcxproj -> C:\Users\nover\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.exe
+﻿  Source.cpp
+c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(452): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(710): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(784): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  Del.vcxproj -> C:\Users\nover\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.exe
   Del.vcxproj -> C:\Users\nover\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.pdb (Partial PDB)

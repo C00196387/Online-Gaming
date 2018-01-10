@@ -425,7 +425,7 @@ int timeUpdated = 0;
 
 int main(int argc, char* args[])
 {
-	std::string ipAddress = "149.153.106.155";
+	std::string ipAddress = "149.153.106.156";
 	int port = 1234;
 
 	std::cout << "Host? Y/N" << std::endl;
@@ -618,7 +618,7 @@ int host(std::string ipAddress, int port)
 					dot.mPosX = speedups.at(i)->x;
 					dot.mPosY = speedups.at(i)->y;
 
-					gDotTexture.setColor(player.at(i)->r, player.at(i)->g, player.at(i)->b);
+					gDotTexture.setColor(speedups.at(i)->r, speedups.at(i)->g, speedups.at(i)->b);
 
 					if (speedups.at(i)->alive == true) {
 						dot.render();
@@ -790,16 +790,20 @@ int client(std::string ipAddress, int port)
 					{
 						int size, x, y;
 						int r, g, b;
+						std::string status;
 
 						std::stringstream ss(std::string(buf, 0, bytesReceived));
 						ss >> size;
 						for (int i = 0; i < size; i++)
 						{
-							ss >> x >> y >> r >> g >> b;
+							ss >> x >> y >> r >> g >> b >> status;
 							dot.mPosX = x;
 							dot.mPosY = y;
 							gDotTexture.setColor(r, g, b);
-							dot.render();
+							if (status == "true")
+							{
+								dot.render();
+							}
 						}
 					}
 				}
@@ -840,6 +844,7 @@ void Listener_MessageReceived(CTcpListener* listener, int client, std::string ms
 	if (proceed)
 	{
 		player.push_back(new PlayerObject(0, 0, sock, rand() % 255, rand() % 255, rand() % 255));
+		player.back()->chaser = false;
 	}
 
 	if (client != systemID)
@@ -848,7 +853,7 @@ void Listener_MessageReceived(CTcpListener* listener, int client, std::string ms
 	}
 	for (int i = 0; i < player.size(); i++)
 	{
-		if (player.at(i)->id == sock && sock == std::to_string(client))
+		if (player.at(i)->id == sock && sock == std::to_string(client) && player.at(i)->alive)
 		{
 			if (msg.find("(right)") != std::string::npos)
 			{
@@ -891,6 +896,14 @@ std::string PacketMaker(std::string id)
 		holder += std::to_string(player.at(i)->r) + " ";
 		holder += std::to_string(player.at(i)->g) + " ";
 		holder += std::to_string(player.at(i)->b) + " ";
+		if (player.at(i)->alive)
+		{
+			holder += "true";
+		}
+		else
+		{
+			holder += "false";
+		}
 	}
 
 	return holder;
