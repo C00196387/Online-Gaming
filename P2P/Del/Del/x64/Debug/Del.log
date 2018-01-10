@@ -1,7 +1,11 @@
 ﻿  Source.cpp
 c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(452): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(732): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(806): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(912): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(603): warning C4244: 'argument': conversion from '__int64' to 'const char', possible loss of data
+c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(616): warning C4244: 'argument': conversion from '__int64' to 'const char', possible loss of data
+c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(744): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(818): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+c:\users\nover\desktop\online-gaming\p2p\del\del\source.cpp(924): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  LINK : C:\Users\nover\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.exe not found or not built by the last incremental link; performing full link
+     Creating library C:\Users\nover\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.lib and object C:\Users\nover\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.exp
   Del.vcxproj -> C:\Users\nover\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.exe
   Del.vcxproj -> C:\Users\nover\Desktop\Online-Gaming\P2P\Del\x64\Debug\Del.pdb (Partial PDB)

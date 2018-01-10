@@ -599,6 +599,12 @@ int host(std::string ipAddress, int port)
 									if (player.at(j)->alive)
 									{
 										player.at(j)->alive = false;
+										player.at(j)->endTime = std::chrono::high_resolution_clock::now();
+										player.at(j)->timeAlive = std::chrono::duration_cast<std::chrono::seconds>(player.at(j)->endTime - player.at(j)->startTime).count();
+
+										if (j == 0) {
+											std::cout << "Time spent alive: " << player.at(j)->timeAlive << std::endl;
+										}
 									}
 								}
 								else if (player.at(j)->chaser)
@@ -606,6 +612,12 @@ int host(std::string ipAddress, int port)
 									if (player.at(i)->alive)
 									{
 										player.at(i)->alive = false;
+										player.at(i)->endTime = std::chrono::high_resolution_clock::now();
+										player.at(i)->timeAlive = std::chrono::duration_cast<std::chrono::seconds>(player.at(i)->endTime - player.at(i)->startTime).count();
+
+										if (i == 0) {
+											std::cout << "Time spent alive: " << player.at(i)->timeAlive << std::endl;
+										}
 									}
 								}
 							}
