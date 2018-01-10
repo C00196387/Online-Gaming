@@ -451,8 +451,11 @@ int host(std::string ipAddress, int port)
 {
 	srand(time(NULL));
 
-	speedups.push_back(new SpeedUp(0, 0, "0", 10, 10));
-	speedups.push_back(new SpeedUp(400, 600, "1", 10, 10));
+	int speedUpRand = rand() % 5 + 5;
+	for (int i = 0; i < speedUpRand; i++)
+	{
+		speedups.push_back(new SpeedUp(rand() % 640, rand() % 480, "0", 10, 10));
+	}
 
 	player.push_back(new PlayerObject(250, 250, "0", rand() % 255, rand() % 255, rand() % 255));
 	CTcpListener server(ipAddress, port, Listener_MessageReceived);
@@ -527,19 +530,19 @@ int host(std::string ipAddress, int port)
 
 				if (up)
 				{
-					player.at(0)->y -= 10;
+					player.at(0)->y -= 5 * player.at(0)->speedModifier;
 				}
 				if (down)
 				{
-					player.at(0)->y += 10;
+					player.at(0)->y += 5 * player.at(0)->speedModifier;
 				}
 				if (left)
 				{
-					player.at(0)->x -= 10;
+					player.at(0)->x -= 5 * player.at(0)->speedModifier;
 				}
 				if (right)
 				{
-					player.at(0)->x += 10;
+					player.at(0)->x += 5 * player.at(0)->speedModifier;
 				}
 
 				//if (SDL_IntersectRect(new SDL_Rect{ dot.mPosX, dot.mPosY, 20, 20 }, new SDL_Rect{ dot2.mPosX, dot2.mPosY, 20, 20 }, new SDL_Rect{ 0,0,0,0 }))
@@ -566,6 +569,22 @@ int host(std::string ipAddress, int port)
 						player.at(i)->y = 0;
 					}
 
+					for (int j = 0; j < speedups.size(); j++) 
+					{
+						if (speedups.at(j)->alive) 
+						{
+							SDL_Rect tempUs = SDL_Rect{ player.at(i)->x, player.at(i)->y, 20, 20 };
+							SDL_Rect tempThem = SDL_Rect{ speedups.at(j)->x, speedups.at(j)->y, 20, 20 };
+							SDL_Rect temp = SDL_Rect{ 0,0,0,0 };
+
+							if (SDL_IntersectRect(&tempUs, &tempThem, &temp)) 
+							{
+								player.at(i)->speedModifier = speedups.at(j)->modifier;
+								speedups.at(j)->alive = false;
+							}
+						}
+					}
+
 					for (int j = 0; j < player.size(); j++)
 					{
 						if (i != j)
@@ -590,7 +609,6 @@ int host(std::string ipAddress, int port)
 									}
 								}
 							}
-
 						}
 					}
 
@@ -617,6 +635,10 @@ int host(std::string ipAddress, int port)
 				for (int i = 0; i < speedups.size(); i++) {
 					dot.mPosX = speedups.at(i)->x;
 					dot.mPosY = speedups.at(i)->y;
+
+					speedups.at(i)->r = rand() % 255;
+					speedups.at(i)->g = rand() % 255;
+					speedups.at(i)->b = rand() % 255;
 
 					gDotTexture.setColor(speedups.at(i)->r, speedups.at(i)->g, speedups.at(i)->b);
 
@@ -843,7 +865,7 @@ void Listener_MessageReceived(CTcpListener* listener, int client, std::string ms
 
 	if (proceed)
 	{
-		player.push_back(new PlayerObject(0, 0, sock, rand() % 255, rand() % 255, rand() % 255));
+		player.push_back(new PlayerObject(rand() % 640, rand() % 480, sock, rand() % 255, rand() % 255, rand() % 255));
 		player.back()->chaser = false;
 	}
 
@@ -857,19 +879,19 @@ void Listener_MessageReceived(CTcpListener* listener, int client, std::string ms
 		{
 			if (msg.find("(right)") != std::string::npos)
 			{
-				player.at(i)->x += 10 * player.at(i)->speedModifier;
+				player.at(i)->x += 5 * player.at(i)->speedModifier;
 			}
 			if (msg.find("(left)") != std::string::npos)
 			{
-				player.at(i)->x -= 10 * player.at(i)->speedModifier;
+				player.at(i)->x -= 5 * player.at(i)->speedModifier;
 			}
 			if (msg.find("(up)") != std::string::npos)
 			{
-				player.at(i)->y -= 10 * player.at(i)->speedModifier;
+				player.at(i)->y -= 5 * player.at(i)->speedModifier;
 			}
 			if (msg.find("(down)") != std::string::npos)
 			{
-				player.at(i)->y += 10 * player.at(i)->speedModifier;
+				player.at(i)->y += 5 * player.at(i)->speedModifier;
 			}
 		}
 	}
@@ -887,7 +909,9 @@ std::string PacketMaker(std::string id)
 {
 	std::string holder;
 
-	holder = std::to_string(player.size()) + " ";
+	int smoulder = player.size() + speedups.size();
+
+	holder = std::to_string(smoulder) + " ";
 
 	for (int i = 0; i < player.size(); i++)
 	{
@@ -898,11 +922,27 @@ std::string PacketMaker(std::string id)
 		holder += std::to_string(player.at(i)->b) + " ";
 		if (player.at(i)->alive)
 		{
-			holder += "true";
+			holder += "true ";
 		}
 		else
 		{
-			holder += "false";
+			holder += "false ";
+		}
+	}
+	for (int i = 0; i < speedups.size(); i++)
+	{
+		holder += std::to_string(speedups.at(i)->x) + " ";
+		holder += std::to_string(speedups.at(i)->y) + " ";
+		holder += std::to_string(speedups.at(i)->r) + " ";
+		holder += std::to_string(speedups.at(i)->g) + " ";
+		holder += std::to_string(speedups.at(i)->b) + " ";
+		if (speedups.at(i)->alive)
+		{
+			holder += "true ";
+		}
+		else
+		{
+			holder += "false ";
 		}
 	}
 
