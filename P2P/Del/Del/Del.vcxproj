@@ -133,10 +133,12 @@
   <ItemGroup>
     <ClCompile Include="server_main.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="SpeedUp.cpp" />
     <ClCompile Include="TcpListener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlayerObject.h" />
+    <ClInclude Include="SpeedUp.h" />
     <ClInclude Include="TcpListener.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

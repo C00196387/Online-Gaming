@@ -16,6 +16,7 @@ and may not be redistributed without written permission.*/
 
 #include "TcpListener.h"
 #include "PlayerObject.h"
+#include "SpeedUp.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -403,6 +404,7 @@ int host(std::string ipAddress, int port);
 int client(std::string ipAddress, int port);
 
 std::vector<PlayerObject*> player;
+std::vector<SpeedUp*> speedups;
 
 int p1x = 0;
 int p1y = 0;
@@ -448,6 +450,10 @@ int main(int argc, char* args[])
 int host(std::string ipAddress, int port)
 {
 	srand(time(NULL));
+
+	speedups.push_back(new SpeedUp(0, 0, "0", 10, 10));
+	speedups.push_back(new SpeedUp(400, 600, "1", 10, 10));
+
 	player.push_back(new PlayerObject(250, 250, "0", rand() % 255, rand() % 255, rand() % 255));
 	CTcpListener server(ipAddress, port, Listener_MessageReceived);
 	//Start up SDL and create window
@@ -604,6 +610,17 @@ int host(std::string ipAddress, int port)
 					gDotTexture.setColor(player.at(i)->r, player.at(i)->g, player.at(i)->b);
 					if (player.at(i)->alive)
 					{
+						dot.render();
+					}
+				}
+
+				for (int i = 0; i < speedups.size(); i++) {
+					dot.mPosX = speedups.at(i)->x;
+					dot.mPosY = speedups.at(i)->y;
+
+					gDotTexture.setColor(player.at(i)->r, player.at(i)->g, player.at(i)->b);
+
+					if (speedups.at(i)->alive == true) {
 						dot.render();
 					}
 				}
@@ -835,22 +852,27 @@ void Listener_MessageReceived(CTcpListener* listener, int client, std::string ms
 		{
 			if (msg.find("(right)") != std::string::npos)
 			{
-				player.at(i)->x += 10;
+				player.at(i)->x += 10 * player.at(i)->speedModifier;
 			}
 			if (msg.find("(left)") != std::string::npos)
 			{
-				player.at(i)->x -= 10;
+				player.at(i)->x -= 10 * player.at(i)->speedModifier;
 			}
 			if (msg.find("(up)") != std::string::npos)
 			{
-				player.at(i)->y -= 10;
+				player.at(i)->y -= 10 * player.at(i)->speedModifier;
 			}
 			if (msg.find("(down)") != std::string::npos)
 			{
-				player.at(i)->y += 10;
+				player.at(i)->y += 10 * player.at(i)->speedModifier;
 			}
 		}
 	}
+	//for (int i = 0; i < speedups.size(); i++) {
+	//	if (msg.find("(" + std::to_string(i) + " touched)") != std::string::npos) {
+	//		speedups.at(i)->alive = false;
+	//	}
+	//}
 
 	listener->Send(client, PacketMaker(holder));
 }
